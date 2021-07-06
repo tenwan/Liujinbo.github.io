@@ -17,7 +17,7 @@
   <meta name="description" content="">
   <meta name="author" content="刘金博">
   <meta name="keywords" content="">
-  <title>时间序列预测（一） - xiaoliu‘s sapce</title>
+  <title>Collections.sort()用法 - xiaoliu‘s sapce</title>
 
   <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.5.3/css/bootstrap.min.css" />
 
@@ -162,7 +162,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="时间序列预测（一）">
+            <span class="h2" id="subtitle" title="Collections.sort()用法">
               
             </span>
 
@@ -172,8 +172,8 @@
   
     <span class="post-meta">
       <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2021-04-12 16:04" pubdate>
-        2021年4月12日 下午
+      <time datetime="2021-07-06 15:09" pubdate>
+        2021年7月6日 下午
       </time>
     </span>
   
@@ -184,7 +184,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      732 字
+      534 字
     </span>
   
 
@@ -194,7 +194,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      8
+      7
        分钟
     </span>
   
@@ -232,69 +232,63 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">时间序列预测（一）</h1>
+            <h1 style="display: none">Collections.sort()用法</h1>
             
             <div class="markdown-body">
-              <h1 id="时间序列预测"><a href="#时间序列预测" class="headerlink" title="时间序列预测"></a>时间序列预测</h1><p>针对当前做时间序列预测的方法进行一些总结。</p>
-<h2 id="周期因子法"><a href="#周期因子法" class="headerlink" title="周期因子法"></a>周期因子法</h2><h3 id="周期因子法概要"><a href="#周期因子法概要" class="headerlink" title="周期因子法概要"></a>周期因子法概要</h3><p>如果数据具有明显的周期性，需要由过去推未来，即可通过周期性进行数据预测。</p>
-<p>下表是一个商场的一周的客流量的情况。</p>
-<table>
-<thead>
-<tr>
-<th>时间</th>
-<th>周一</th>
-<th>周二</th>
-<th>周三</th>
-<th>周四</th>
-<th>周五</th>
-<th>周六</th>
-<th>周日</th>
-<th>平均值</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>第一周</td>
-<td>20</td>
-<td>10</td>
-<td>70</td>
-<td>50</td>
-<td>250</td>
-<td>200</td>
-<td>100</td>
-<td>100</td>
-</tr>
-<tr>
-<td>第二周</td>
-<td>26</td>
-<td>18</td>
-<td>66</td>
-<td>50</td>
-<td>180</td>
-<td>140</td>
-<td>80</td>
-<td>80</td>
-</tr>
-<tr>
-<td>第三周</td>
-<td>15</td>
-<td>8</td>
-<td>67</td>
-<td>60</td>
-<td>270</td>
-<td>160</td>
-<td>120</td>
-<td>100</td>
-</tr>
-</tbody></table>
-<p>可以看到以每周为周期的数据波动，预测即尽可能准确提取这种周期波动。</p>
-<p>首先计算周均值，然后将每列数据除以周均值，得到比例。然后按列找出比例因子的中位数。<br>| 时间   | 周一  | 周二  | 周三  | 周四  | 周五 | 周六 | 周日 |<br>| —— | —– | —– | —– | —– | —- | —- | —- |<br>| 第一周 | 0.2   | 0.1   | 0.7   | 0.5   | 2.5  | 2    | 1    |<br>| 第二周 | 0.325 | 0.225 | 0.825 | 0.625 | 2.25 | 1.75 | 1    |<br>| 第三周 | 0.15  | 0.08  | 0.67  | 0.6   | 2.7  | 1.6  | 1.2  |<br>| 中位数 | 0.2   | 0.1   | 0.7   | 0.6   | 2.5  | 1.75 | 1    |</p>
-<p>预测即可通过将周期因子乘以一个base来做下一周的预测。这个base可以是上一周的平均数，也可以是更多的优化。</p>
-<h3 id="周期因子法优化"><a href="#周期因子法优化" class="headerlink" title="周期因子法优化"></a>周期因子法优化</h3><h4 id="优化周期因子"><a href="#优化周期因子" class="headerlink" title="优化周期因子"></a>优化周期因子</h4><p>按列提取中位数是排除极端值的有效手法，但有时可能丢失大量信息，可以针对均值和中位数进行比例融合，也可根据时间跨度距离预测时间段的远近，给数据加上不同权重来进行优化。</p>
-<h4 id="优化base取法"><a href="#优化base取法" class="headerlink" title="优化base取法"></a>优化base取法</h4><p>直接取预测时间点上一周的平均值可能不是取base的好方法，也可取最后五天或几天的均值来反映最近的情况，但这个取法需要排除周期性影响，可用客流量初一周期因子后再取均值，这样作为base。<br>| 时间         | 周一 | 周二 | 周三 | 周四 | 周五 | 周六 | 周日 |<br>| ———— | —- | —- | —- | —- | —- | —- | —- |<br>| 第三周       | 15   | 8    | 67   | 60   | 270  | 160  | 120  |<br>| 中位数       | 0.2  | 0.1  | 0.7  | 0.6  | 2.5  | 1.75 | 1    |<br>| 去周期化客流 | 75   | 80   | 95.7 | 100  | 108  | 91.4 | 120  |</p>
-<h2 id="时序建模法"><a href="#时序建模法" class="headerlink" title="时序建模法"></a>时序建模法</h2><p>使用ARIMA等线性模型，为金融中常用来分析投资品收益率的序列方法。本方法要点是挖掘时间序列中的自相关性，通常通过计算协方差或相关系数实现。</p>
-<h2 id="监督学习模型"><a href="#监督学习模型" class="headerlink" title="监督学习模型"></a>监督学习模型</h2><p>使用xgboot，LSTM模型，seq2seq等将其转化为有监督学习数据集。</p>
-<p>其中使用python将时间序列转换为监督学习问题在此链接<a href="https://link.zhihu.com/?target=https://cloud.tencent.com/developer/article/1042809%E3%80%82">https://link.zhihu.com/?target=https%3A//cloud.tencent.com/developer/article/1042809。</a></p>
-<p>使用纯粹seq2seq模型对相关问题的解决方案在此链接<a href="https://link.zhihu.com/?target=https://github.com/LenzDu/Kaggle-Competition-Favorita/blob/master/seq2seq.py%E3%80%82">https://link.zhihu.com/?target=https%3A//github.com/LenzDu/Kaggle-Competition-Favorita/blob/master/seq2seq.py。</a></p>
+              <h1 id="Collections-sort-用法"><a href="#Collections-sort-用法" class="headerlink" title="Collections.sort()用法"></a>Collections.sort()用法</h1><blockquote>
+<p>在做算法题时，碰到了这样的一道：删除 s 中的一些字符，使得它构成字符串列表 d 中的一个字符串，找出能构成的最长字符串。如果有多个相同长度的结果，返回字典序的最小字符串。</p>
+<pre><code class="hljs groovy">&gt;Example <span class="hljs-number">1</span>: <span class="hljs-attr">Input:</span> s = <span class="hljs-string">&quot;abpcplea&quot;</span>, d = [<span class="hljs-string">&quot;ale&quot;</span>,<span class="hljs-string">&quot;apple&quot;</span>,<span class="hljs-string">&quot;monkey&quot;</span>,<span class="hljs-string">&quot;plea&quot;</span>]
+&gt;<span class="hljs-attr">Output:</span> <span class="hljs-string">&quot;apple&quot;</span></code></pre>
+</blockquote>
+<blockquote>
+<p>解题过程中需要对列表进行自定义比较器定义，之前只用过自然排序，在此进行总结</p>
+<pre><code class="hljs Java">&gt;<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LongestWordInDictonary</span> </span>&#123;
+ <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> Exception </span>&#123;
+   <span class="hljs-comment">//数组转列表</span>
+   List&lt;String&gt; dict = Arrays.asList(<span class="hljs-string">&quot;ale&quot;</span>, <span class="hljs-string">&quot;apple&quot;</span>, <span class="hljs-string">&quot;monkey&quot;</span>, <span class="hljs-string">&quot;plea&quot;</span>);
+   System.out.println(<span class="hljs-keyword">new</span> LongestWordInDictonary().findLongestWord(<span class="hljs-string">&quot;abpcplea&quot;</span>, dict));
+ &#125;
+
+ <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">findLongestWord</span><span class="hljs-params">(String s, List&lt;String&gt; d)</span> </span>&#123;
+   Collections.sort(
+       d, Comparator.comparing(String::length).reversed().thenComparing(String::compareTo));
+   <span class="hljs-keyword">for</span> (String str : d) &#123;
+     <span class="hljs-keyword">if</span> (str.length() &lt;= s.length()) &#123;
+       <span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>, j = <span class="hljs-number">0</span>;
+       <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> l1 = s.length(), l2 = str.length(); i &lt; l1 &amp;&amp; j &lt; l2; ) &#123;
+         <span class="hljs-keyword">if</span> (s.charAt(i) == str.charAt(j)) &#123;
+           i++;
+           j++;
+         &#125; <span class="hljs-keyword">else</span> &#123;
+           i++;
+         &#125;
+       &#125;
+       <span class="hljs-keyword">if</span> (j &gt;= str.length()) <span class="hljs-keyword">return</span> str;
+     &#125;
+   &#125;
+   <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>;
+ &#125;
+&gt;&#125;</code></pre>
+</blockquote>
+<p>Collections类里有sort()的两个方法。第一种只需传入被排序的集合，便会为它自然排序。第二种需要我们自定义排序的方式，细则可以创建一个比较器来进行排序，Comparator也是属于函数式接口，我们也能使用lambda表达式。对上述代码使用的方法进行总结。</p>
+<h2 id="使用Comparator-comparing进行排序"><a href="#使用Comparator-comparing进行排序" class="headerlink" title="使用Comparator.comparing进行排序"></a>使用Comparator.comparing进行排序</h2><p>首先查看Comparator类的内部实现comparing，查询如下：</p>
+<pre><code class="hljs livescript">public <span class="hljs-keyword">static</span> &lt;T, U&gt; Comparator&lt;T&gt; comparing(
+            <span class="hljs-built_in">Function</span>&lt;? <span class="hljs-built_in">super</span> T, ? <span class="hljs-keyword">extends</span> U&gt; keyExtractor,
+            Comparator&lt;? <span class="hljs-built_in">super</span> U&gt; keyComparator)
+    &#123;
+        Objects.requireNonNull(keyExtractor);
+        Objects.requireNonNull(keyComparator);
+        <span class="hljs-keyword">return</span> (Comparator&lt;T&gt; &amp; Serializable)
+            <span class="hljs-function"><span class="hljs-params">(c1, c2)</span> -&gt;</span> keyComparator.compare(keyExtractor.apply(c1),
+                                              keyExtractor.apply(c2));
+    &#125;</code></pre>
+
+<p>可以看到比较器参数keyComparator ，用来创建自定义比较器</p>
+<p>即对应上述片段。</p>
+<pre><code class="hljs css"><span class="hljs-selector-tag">Comparator</span><span class="hljs-selector-class">.comparing</span>(<span class="hljs-selector-tag">String</span><span class="hljs-selector-pseudo">::length)</span></code></pre>
+
+<h2 id="使用Comparator-reversed进行排序"><a href="#使用Comparator-reversed进行排序" class="headerlink" title="使用Comparator.reversed进行排序"></a>使用Comparator.reversed进行排序</h2><p>返回相反的排序规则</p>
+<h2 id="使用Comparator-thenComparing进行排序"><a href="#使用Comparator-thenComparing进行排序" class="headerlink" title="使用Comparator.thenComparing进行排序"></a>使用Comparator.thenComparing进行排序</h2><p>比排序的比较顺序进行定义，在本题应用上，先按字符串长度，后按字典序进行排序</p>
 
             </div>
             <hr>
@@ -304,7 +298,7 @@
                   <div class="post-meta mr-3">
                     <i class="iconfont icon-category"></i>
                     
-                      <a class="hover-with-bg" href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a>
+                      <a class="hover-with-bg" href="/categories/Java%E7%9F%A5%E8%AF%86/">Java知识</a>
                     
                   </div>
                 
@@ -312,7 +306,7 @@
                   <div class="post-meta">
                     <i class="iconfont icon-tags"></i>
                     
-                      <a class="hover-with-bg" href="/tags/seq2seq/">seq2seq</a>
+                      <a class="hover-with-bg" href="/tags/%E9%9B%86%E5%90%88/">集合</a>
                     
                   </div>
                 
@@ -325,18 +319,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2021/07/06/Collections.sort()%E7%94%A8%E6%B3%95/">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Collections.sort()用法</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2021/04/06/N%E4%BA%BA%E8%B5%B0%E9%92%A2%E7%B4%A2%E9%97%AE%E9%A2%98%E8%B8%A9%E5%9D%91/">
-                        <span class="hidden-mobile">N人走钢索问题踩坑</span>
+                      <a href="/2021/04/12/%E6%97%B6%E9%97%B4%E5%BA%8F%E5%88%97%E9%A2%84%E6%B5%8B%EF%BC%88%E4%B8%80%EF%BC%89/">
+                        <span class="hidden-mobile">时间序列预测（一）</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
