@@ -184,7 +184,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      1.7k 字
+      2k 字
     </span>
   
 
@@ -194,7 +194,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      18
+      22
        分钟
     </span>
   
@@ -397,6 +397,24 @@
 <li>InnoDB 存储引擎提供了具有提交、回滚、崩溃恢复能力的事务安全，与 MyISAM 比 InnoDB 写的效率差一些，并且会占用更多的磁盘空间以保留数据和索引</li>
 </ul>
 <h2 id="数据库中的锁"><a href="#数据库中的锁" class="headerlink" title="数据库中的锁"></a>数据库中的锁</h2><p><img src="/img/suoleixing.png" srcset="/img/loading.gif"></p>
+<h2 id="Mysql的读写分离"><a href="#Mysql的读写分离" class="headerlink" title="Mysql的读写分离"></a>Mysql的读写分离</h2><p>基于主从复制架构，主库写，从库读，主库自动将数据同步到从库</p>
+<h3 id="主从复制原理"><a href="#主从复制原理" class="headerlink" title="主从复制原理"></a>主从复制原理</h3><p>主库将变更写入 binlog 日志，然后从库连接到主库之后，从库有一个 IO 线程，将主库的 binlog 日志拷贝到自己本地，写入一个 relay 中继日志中。接着从库中有一个 SQL 线程会从中继日志读取 binlog，然后执行 binlog 日志中的内容，也就是在自己本地再次执行一遍 SQL，这样就可以保证自己跟主库的数据是一样的。</p>
+<h3 id="主从同步延时"><a href="#主从同步延时" class="headerlink" title="主从同步延时"></a>主从同步延时</h3><blockquote>
+<p>从库同步主库数据的过程是串行化的，主库上并行的操作，在从库上会串行执行，即会造成高并发场景下，从库的数据一定会比主库慢一些.</p>
+</blockquote>
+<p>有两个机制主要解决此问题：</p>
+<ul>
+<li>半同步复制<ul>
+<li>主要解决主库数据丢失问题。</li>
+<li>主库写入 binlog 日志之后，就会将<strong>强制</strong>此时立即将数据同步到从库，从库将日志写入自己本地的 relay log 之后，接着会返回一个 ack 给主库，主库接收到<strong>至少一个从库</strong>的 ack 之后才会认为写操作完成。</li>
+</ul>
+</li>
+<li>并行复制<ul>
+<li>主要解决主从同步延时问题。</li>
+<li>从库开启多个线程，并行读取 relay log 中不同库的日志，然后<strong>并行重放不同库的日志</strong>，完成库级别的并行。</li>
+</ul>
+</li>
+</ul>
 
             </div>
             <hr>
